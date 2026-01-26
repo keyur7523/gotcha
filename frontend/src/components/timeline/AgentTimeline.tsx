@@ -1,14 +1,14 @@
 import { useAnalysisStore } from '@/stores/analysisStore'
 import { cn } from '@/lib/utils'
-import { Check, Loader2, Search, TestTube, Play, Wrench } from 'lucide-react'
+import { Check, Loader2, Search, TestTube, Play, Wrench, Sparkles } from 'lucide-react'
 import type { StepAction } from '@/types/analysis'
 
-const actionIcons: Record<StepAction, typeof Search> = {
-  analyzing: Search,
-  generating_test: TestTube,
-  executing: Play,
-  refining: Wrench,
-  complete: Check,
+const actionConfig: Record<StepAction, { icon: typeof Search; label: string }> = {
+  analyzing: { icon: Search, label: 'Analyzing' },
+  generating_test: { icon: TestTube, label: 'Generating Test' },
+  executing: { icon: Play, label: 'Executing' },
+  refining: { icon: Wrench, label: 'Refining' },
+  complete: { icon: Sparkles, label: 'Complete' },
 }
 
 export default function AgentTimeline() {
@@ -19,35 +19,43 @@ export default function AgentTimeline() {
   }
 
   const currentStep = steps[steps.length - 1]
+  const isComplete = currentStep?.action === 'complete'
 
   return (
-    <div className="border-t border-border p-4">
-      <div className="flex items-center gap-2 mb-3">
+    <div className={cn(
+      'border-t border-border p-4 transition-colors',
+      isComplete ? 'bg-success/5' : 'bg-surface'
+    )}>
+      <div className="flex items-center gap-1 mb-3 overflow-x-auto pb-1">
         {steps.map((step, idx) => {
-          const Icon = actionIcons[step.action]
+          const config = actionConfig[step.action]
+          const Icon = config.icon
           const isLast = idx === steps.length - 1
-          const isComplete = step.action === 'complete'
+          const isStepComplete = !isLast || step.action === 'complete'
 
           return (
-            <div key={step.step_number} className="flex items-center">
+            <div key={step.step_number} className="flex items-center flex-shrink-0">
               <div
                 className={cn(
-                  'w-6 h-6 rounded-full flex items-center justify-center',
-                  isComplete
-                    ? 'bg-success text-white'
+                  'w-7 h-7 rounded-full flex items-center justify-center transition-all',
+                  isStepComplete
+                    ? 'bg-success/20 text-success'
                     : isLast && isRunning
-                    ? 'bg-accent text-white'
-                    : 'bg-surface text-text-secondary'
+                    ? 'bg-accent/20 text-accent'
+                    : 'bg-surface-hover text-text-muted'
                 )}
+                title={config.label}
               >
-                {isLast && isRunning && !isComplete ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                {isLast && isRunning && step.action !== 'complete' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : isStepComplete ? (
+                  <Check className="w-3.5 h-3.5" />
                 ) : (
-                  <Icon className="w-3 h-3" />
+                  <Icon className="w-3.5 h-3.5" />
                 )}
               </div>
               {idx < steps.length - 1 && (
-                <div className="w-8 h-0.5 bg-border mx-1" />
+                <div className="w-6 h-0.5 mx-0.5 bg-success/30" />
               )}
             </div>
           )
@@ -55,7 +63,17 @@ export default function AgentTimeline() {
       </div>
 
       {currentStep && (
-        <p className="text-sm text-text-secondary">{currentStep.description}</p>
+        <div className="flex items-center gap-2">
+          {isRunning && !isComplete && (
+            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+          )}
+          <p className={cn(
+            'text-sm',
+            isComplete ? 'text-success' : 'text-text-secondary'
+          )}>
+            {currentStep.description}
+          </p>
+        </div>
       )}
     </div>
   )

@@ -1,18 +1,63 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronUp, Code, Wrench } from 'lucide-react'
+import { ChevronDown, ChevronUp, Code, Wrench, Copy, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import SeverityBadge from './SeverityBadge'
 import StatusBadge from './StatusBadge'
+import { useAnalysisStore } from '@/stores/analysisStore'
 import type { Issue } from '@/types/analysis'
 
 interface IssueCardProps {
   issue: Issue
 }
 
-export default function IssueCard({ issue }: IssueCardProps) {
-  const [expanded, setExpanded] = useState(false)
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      toast.success(`${label} copied to clipboard`)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error('Failed to copy')
+    }
+  }
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
+    <button
+      onClick={handleCopy}
+      className="p-1 rounded hover:bg-surface-hover transition-colors"
+      title={`Copy ${label.toLowerCase()}`}
+    >
+      {copied ? (
+        <Check className="w-3.5 h-3.5 text-success" />
+      ) : (
+        <Copy className="w-3.5 h-3.5 text-text-muted" />
+      )}
+    </button>
+  )
+}
+
+export default function IssueCard({ issue }: IssueCardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const { setHighlightedLines } = useAnalysisStore()
+
+  const handleMouseEnter = () => {
+    setHighlightedLines({ start: issue.line_start, end: issue.line_end })
+  }
+
+  const handleMouseLeave = () => {
+    setHighlightedLines(null)
+  }
+
+  return (
+    <div
+      className="border border-border rounded-lg overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full p-4 flex items-start gap-3 text-left hover:bg-surface-hover transition-colors"
@@ -44,10 +89,13 @@ export default function IssueCard({ issue }: IssueCardProps) {
 
           {issue.test_result && (
             <div>
-              <h4 className="text-xs font-medium text-text-secondary mb-1 flex items-center gap-1">
-                <Code className="w-3 h-3" />
-                Test Code
-              </h4>
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-xs font-medium text-text-secondary flex items-center gap-1">
+                  <Code className="w-3 h-3" />
+                  Test Code
+                </h4>
+                <CopyButton text={issue.test_result.test_code} label="Test code" />
+              </div>
               <pre className="text-xs bg-code-bg p-3 rounded-md overflow-x-auto">
                 {issue.test_result.test_code}
               </pre>
@@ -61,10 +109,13 @@ export default function IssueCard({ issue }: IssueCardProps) {
 
           {issue.suggested_fix && (
             <div>
-              <h4 className="text-xs font-medium text-text-secondary mb-1 flex items-center gap-1">
-                <Wrench className="w-3 h-3" />
-                Suggested Fix
-              </h4>
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-xs font-medium text-text-secondary flex items-center gap-1">
+                  <Wrench className="w-3 h-3" />
+                  Suggested Fix
+                </h4>
+                <CopyButton text={issue.suggested_fix} label="Fix" />
+              </div>
               <pre className="text-xs bg-success/10 p-3 rounded-md overflow-x-auto">
                 {issue.suggested_fix}
               </pre>

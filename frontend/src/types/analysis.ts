@@ -53,9 +53,13 @@ export interface AnalysisSession {
   completed_at?: string
 }
 
+export type Strictness = 'relaxed' | 'normal' | 'strict'
+
 export interface AnalyzeRequest {
   code: string
   language: Language
+  strictness?: Strictness
+  max_issues?: number
 }
 
 export interface AnalyzeResponse {

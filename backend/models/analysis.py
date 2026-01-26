@@ -9,6 +9,12 @@ class Language(str, Enum):
     JAVASCRIPT = "javascript"
 
 
+class Strictness(str, Enum):
+    RELAXED = "relaxed"
+    NORMAL = "normal"
+    STRICT = "strict"
+
+
 class Severity(str, Enum):
     CRITICAL = "critical"
     HIGH = "high"
@@ -81,6 +87,8 @@ class AnalysisSession(BaseModel):
 class AnalyzeRequest(BaseModel):
     code: str
     language: Language
+    strictness: Strictness = Strictness.NORMAL
+    max_issues: int = 10
     options: Optional[AnalysisOptions] = None
 
 

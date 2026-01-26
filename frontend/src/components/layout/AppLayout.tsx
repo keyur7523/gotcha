@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { Target, History, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import SettingsModal from '@/components/settings/SettingsModal'
 
 export default function AppLayout() {
   const location = useLocation()
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -37,7 +40,10 @@ export default function AppLayout() {
             <History className="w-4 h-4" />
             History
           </Link>
-          <button className="p-2 rounded-md text-text-muted hover:text-text hover:bg-surface-hover transition-colors">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 rounded-md text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
+          >
             <Settings className="w-4 h-4" />
           </button>
         </nav>
@@ -46,6 +52,8 @@ export default function AppLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
+
+      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   )
 }

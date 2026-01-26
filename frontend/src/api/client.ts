@@ -1,4 +1,20 @@
+import { useSettingsStore } from '@/stores/settingsStore'
+
 const API_BASE = '/api/v1'
+
+function getHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  // Add custom API key if configured
+  const customApiKey = useSettingsStore.getState().customApiKey
+  if (customApiKey) {
+    headers['X-Custom-API-Key'] = customApiKey
+  }
+
+  return headers
+}
 
 async function request<T>(
   endpoint: string,
@@ -6,14 +22,15 @@ async function request<T>(
 ): Promise<T> {
   const res = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
-      'Content-Type': 'application/json',
+      ...getHeaders(),
       ...options?.headers,
     },
     ...options,
   })
 
   if (!res.ok) {
-    throw new Error(`API Error: ${res.status}`)
+    const errorData = await res.json().catch(() => ({}))
+    throw new Error(errorData.detail || `API Error: ${res.status}`)
   }
 
   return res.json()

@@ -32,6 +32,23 @@
   --radius-full: 9999px;
 }
 
+/* Light theme overrides */
+.light {
+  --color-bg: #ffffff;
+  --color-surface: #f4f4f5;
+  --color-surface-hover: #e4e4e7;
+  --color-elevated: #fafafa;
+
+  --color-border: #e4e4e7;
+  --color-border-muted: #f4f4f5;
+
+  --color-text: #18181b;
+  --color-text-secondary: #52525b;
+  --color-text-muted: #a1a1aa;
+
+  --color-code-bg: #f4f4f5;
+}
+
 body {
   margin: 0;
   background-color: var(--color-bg);
@@ -46,4 +63,16 @@ body {
 
 .monaco-editor {
   --vscode-editor-background: var(--color-code-bg) !important;
+}
+
+/* Monaco editor line highlighting for issues */
+.highlighted-line {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.highlighted-glyph {
+  background-color: var(--color-error);
+  width: 4px !important;
+  margin-left: 3px;
+  border-radius: 2px;
 }

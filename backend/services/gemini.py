@@ -1,3 +1,5 @@
+from typing import Optional
+
 from google import genai
 from google.genai import types
 
@@ -5,10 +7,11 @@ from core.config import settings
 
 
 class GeminiClient:
-    def __init__(self):
-        self._client = genai.Client(api_key=settings.gemini_api_key)
+    def __init__(self, api_key: Optional[str] = None):
+        # Use custom API key if provided, otherwise fall back to settings
+        key = api_key or settings.gemini_api_key
+        self._client = genai.Client(api_key=key)
         self._model = "gemini-2.0-flash"
-        self._thinking_model = "gemini-2.0-flash-thinking-exp-01-21"
 
     async def generate(
         self,
@@ -16,17 +19,19 @@ class GeminiClient:
         use_thinking: bool = False,
         temperature: float = 0.7,
     ) -> str:
-        model = self._thinking_model if use_thinking else self._model
-
-        response = await self._client.aio.models.generate_content(
-            model=model,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=temperature,
-            ),
-        )
-
-        return response.text
+        # use_thinking param kept for API compatibility but uses same model
+        try:
+            response = await self._client.aio.models.generate_content(
+                model=self._model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=temperature,
+                ),
+            )
+            return response.text or ""
+        except Exception as e:
+            print(f"Gemini API error: {e}")
+            raise
 
     async def generate_json(
         self,
@@ -34,18 +39,20 @@ class GeminiClient:
         use_thinking: bool = False,
         temperature: float = 0.3,
     ) -> str:
-        model = self._thinking_model if use_thinking else self._model
-
-        response = await self._client.aio.models.generate_content(
-            model=model,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=temperature,
-                response_mime_type="application/json",
-            ),
-        )
-
-        return response.text
+        # use_thinking param kept for API compatibility but uses same model
+        try:
+            response = await self._client.aio.models.generate_content(
+                model=self._model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=temperature,
+                    response_mime_type="application/json",
+                ),
+            )
+            return response.text or "[]"
+        except Exception as e:
+            print(f"Gemini API error: {e}")
+            raise
 
 
 gemini_client = GeminiClient()

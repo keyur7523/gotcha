@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import api_router
+from api.routes import websocket
 from core.config import settings
 
 app = FastAPI(
@@ -19,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+app.include_router(websocket.router)
 
 
 @app.get("/health")

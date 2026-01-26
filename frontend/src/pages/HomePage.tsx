@@ -1,36 +1,14 @@
-import { useEffect } from 'react'
 import CodeEditor from '@/components/editor/CodeEditor'
 import EditorToolbar from '@/components/editor/EditorToolbar'
 import ReviewPanel from '@/components/review/ReviewPanel'
 import AgentTimeline from '@/components/timeline/AgentTimeline'
 import { useAnalysisStore } from '@/stores/analysisStore'
 import { useAnalysisWebSocket } from '@/hooks/useWebSocket'
-import { analysisApi } from '@/api/analysis'
 
 export default function HomePage() {
-  const { sessionId, setResult, setIsRunning } = useAnalysisStore()
+  const { sessionId } = useAnalysisStore()
 
   useAnalysisWebSocket(sessionId)
-
-  // Fetch result when session completes
-  useEffect(() => {
-    if (!sessionId) return
-
-    const fetchResult = async () => {
-      try {
-        const session = await analysisApi.get(sessionId)
-        if (session.status === 'completed' && session.result) {
-          setResult(session.result)
-          setIsRunning(false)
-        }
-      } catch (error) {
-        console.error('Failed to fetch session:', error)
-      }
-    }
-
-    const interval = setInterval(fetchResult, 2000)
-    return () => clearInterval(interval)
-  }, [sessionId, setResult, setIsRunning])
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col">
@@ -42,7 +20,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="w-[400px] flex flex-col bg-surface">
+        <div className="w-[420px] flex flex-col bg-surface">
           <ReviewPanel />
         </div>
       </div>

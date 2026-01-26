@@ -1,6 +1,14 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useAnalysisStore } from '@/stores/analysisStore'
-import type { AgentStep } from '@/types/analysis'
+import type { AgentStep, AnalysisResult } from '@/types/analysis'
+
+interface WebSocketMessage extends AgentStep {
+  error?: string
+  data?: {
+    result?: AnalysisResult
+    [key: string]: unknown
+  }
+}
 
 export function useAnalysisWebSocket(sessionId: string | null) {
   const wsRef = useRef<WebSocket | null>(null)
@@ -9,31 +17,61 @@ export function useAnalysisWebSocket(sessionId: string | null) {
   const connect = useCallback(() => {
     if (!sessionId) return
 
+    if (wsRef.current) {
+      wsRef.current.close()
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const ws = new WebSocket(`${protocol}//${window.location.host}/api/v1/ws/${sessionId}`)
+    const wsUrl = `${protocol}//${window.location.host}/api/v1/ws/${sessionId}`
+
+    console.log('Connecting to WebSocket:', wsUrl)
+    const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
+      console.log('WebSocket connected')
       setIsRunning(true)
     }
 
     ws.onmessage = (event) => {
-      const step: AgentStep = JSON.parse(event.data)
-      addStep(step)
+      try {
+        const message: WebSocketMessage = JSON.parse(event.data)
+        console.log('WebSocket message:', message)
 
-      if (step.action === 'complete') {
-        setIsRunning(false)
-        if (step.data?.result) {
-          setResult(step.data.result as never)
+        if (message.error) {
+          setError(message.error)
+          setIsRunning(false)
+          return
         }
+
+        if (message.action) {
+          addStep({
+            step_number: message.step_number,
+            action: message.action,
+            description: message.description,
+            timestamp: message.timestamp,
+            data: message.data,
+          })
+        }
+
+        if (message.action === 'complete') {
+          setIsRunning(false)
+          if (message.data?.result) {
+            setResult(message.data.result)
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse WebSocket message:', e)
       }
     }
 
-    ws.onerror = () => {
-      setError('WebSocket connection error')
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error)
+      setError('Connection error. Please try again.')
       setIsRunning(false)
     }
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
+      console.log('WebSocket closed:', event.code, event.reason)
       setIsRunning(false)
     }
 
@@ -44,7 +82,10 @@ export function useAnalysisWebSocket(sessionId: string | null) {
     connect()
 
     return () => {
-      wsRef.current?.close()
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
     }
   }, [connect])
 

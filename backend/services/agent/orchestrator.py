@@ -8,17 +8,28 @@ from models.analysis import (
     Issue,
     IssueStatus,
     Severity,
+    Strictness,
     TestResult,
 )
 from services.session_store import session_store
-from .analyzer import analyzer
+from .analyzer import CodeAnalyzer
 from .test_generator import test_generator
 from .fix_generator import fix_generator
 
 
 class AgentOrchestrator:
-    def __init__(self, executor=None):
+    def __init__(
+        self,
+        executor=None,
+        strictness: Optional[Strictness] = None,
+        max_issues: int = 10,
+        custom_api_key: Optional[str] = None,
+    ):
         self._executor = executor
+        self._strictness = strictness or Strictness.NORMAL
+        self._max_issues = max_issues
+        self._custom_api_key = custom_api_key
+        self._analyzer = CodeAnalyzer(custom_api_key=custom_api_key)
 
     async def run_analysis(
         self,
@@ -45,10 +56,14 @@ class AgentOrchestrator:
         steps.append(step)
         yield step
 
-        potential_issues = await analyzer.analyze(
+        potential_issues = await self._analyzer.analyze(
             code=session.code,
             language=session.language.value,
+            strictness=self._strictness.value,
         )
+
+        # Limit issues based on max_issues setting
+        potential_issues = potential_issues[: self._max_issues]
 
         # Step 2: Generate and execute tests for each issue
         for idx, potential in enumerate(potential_issues):

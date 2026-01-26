@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
+from typing import Optional
 
 from models.analysis import (
     AnalyzeRequest,
@@ -11,11 +12,17 @@ router = APIRouter(prefix="/analyze", tags=["analysis"])
 
 
 @router.post("", response_model=AnalyzeResponse)
-async def create_analysis(request: AnalyzeRequest) -> AnalyzeResponse:
+async def create_analysis(
+    request: AnalyzeRequest,
+    x_custom_api_key: Optional[str] = Header(None),
+) -> AnalyzeResponse:
     session = session_store.create_session(
         code=request.code,
         language=request.language,
         options=request.options,
+        strictness=request.strictness,
+        max_issues=request.max_issues,
+        custom_api_key=x_custom_api_key,
     )
 
     session_store.update_session(session.id, status="running")
