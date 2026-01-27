@@ -1,5 +1,7 @@
 # Environment
 .env
+.env.local
+.env.*.local
 venv/
 .venv/
 
@@ -8,15 +10,29 @@ __pycache__/
 *.py[cod]
 *.so
 *.egg-info/
+.pytest_cache/
 
 # Node
 node_modules/
 dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
 
 # IDE
 .vscode/
 .idea/
 *.swp
+*.swo
 
 # OS
 .DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.coverage
+htmlcov/
