@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Code, Wrench, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import SeverityBadge from './SeverityBadge'
 import StatusBadge from './StatusBadge'
+import { Collapse } from '@/components/ui/Animations'
 import { useAnalysisStore } from '@/stores/analysisStore'
 import type { Issue } from '@/types/analysis'
 
@@ -80,7 +81,7 @@ export default function IssueCard({ issue }: IssueCardProps) {
         )}
       </button>
 
-      {expanded && (
+      <Collapse isOpen={expanded}>
         <div className="px-4 pb-4 space-y-4">
           <div>
             <h4 className="text-xs font-medium text-text-secondary mb-1">Description</h4>
@@ -122,7 +123,7 @@ export default function IssueCard({ issue }: IssueCardProps) {
             </div>
           )}
         </div>
-      )}
+      </Collapse>
     </div>
   )
 }

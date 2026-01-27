@@ -1,12 +1,20 @@
 import { useState } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { Target, History, Settings } from 'lucide-react'
+import { Target, History, Settings, Keyboard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import SettingsModal from '@/components/settings/SettingsModal'
+import KeyboardShortcutsModal from '@/components/ui/KeyboardShortcutsModal'
+import { useGlobalShortcuts } from '@/hooks/useKeyboardShortcuts'
 
 export default function AppLayout() {
   const location = useLocation()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+
+  useGlobalShortcuts({
+    onOpenSettings: () => setSettingsOpen(true),
+    onShowHelp: () => setShortcutsOpen(true),
+  })
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -41,8 +49,16 @@ export default function AppLayout() {
             History
           </Link>
           <button
+            onClick={() => setShortcutsOpen(true)}
+            className="p-2 rounded-md text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
+            title="Keyboard shortcuts (⌘/)"
+          >
+            <Keyboard className="w-4 h-4" />
+          </button>
+          <button
             onClick={() => setSettingsOpen(true)}
             className="p-2 rounded-md text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
+            title="Settings (⌘,)"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -54,6 +70,7 @@ export default function AppLayout() {
       </main>
 
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <KeyboardShortcutsModal isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   )
 }

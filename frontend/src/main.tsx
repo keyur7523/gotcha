@@ -5,6 +5,12 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import App from './App'
 import './index.css'
+import { useSettingsStore } from '@/stores/settingsStore'
+
+export function ThemedToaster() {
+  const theme = useSettingsStore((s) => s.theme)
+  return <Toaster theme={theme} position="bottom-right" />
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {

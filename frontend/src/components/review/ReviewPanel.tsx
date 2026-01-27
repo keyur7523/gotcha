@@ -1,6 +1,7 @@
 import { useAnalysisStore } from '@/stores/analysisStore'
 import IssueCard from './IssueCard'
 import { SkeletonCard } from '@/components/ui/Skeleton'
+import { StaggerContainer, StaggerItem } from '@/components/ui/Animations'
 import { Target, CheckCircle, AlertTriangle } from 'lucide-react'
 
 export default function ReviewPanel() {
@@ -88,8 +89,8 @@ export default function ReviewPanel() {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {result.issues.length === 0 ? (
+      {result.issues.length === 0 ? (
+        <div className="flex-1 overflow-y-auto p-4">
           <div className="text-center py-8">
             <CheckCircle className="w-10 h-10 text-success mx-auto mb-3" />
             <p className="font-medium">No issues found!</p>
@@ -97,12 +98,16 @@ export default function ReviewPanel() {
               Your code looks good. Gotcha couldn't find any bugs.
             </p>
           </div>
-        ) : (
-          result.issues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} />
-          ))
-        )}
-      </div>
+        </div>
+      ) : (
+        <StaggerContainer className="flex-1 overflow-y-auto p-4 space-y-3">
+          {result.issues.map((issue) => (
+            <StaggerItem key={issue.id}>
+              <IssueCard issue={issue} />
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      )}
     </div>
   )
 }

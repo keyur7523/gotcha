@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { X, Monitor, Code, Sparkles, Key, RotateCcw, Eye, EyeOff } from 'lucide-react'
 import { useSettingsStore, type Theme, type Strictness } from '@/stores/settingsStore'
 import { cn } from '@/lib/utils'
+import { AnimatePresence, motion } from 'framer-motion'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -15,8 +16,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [showApiKey, setShowApiKey] = useState(false)
   const settings = useSettingsStore()
 
-  if (!isOpen) return null
-
   const tabs: { id: Tab; label: string; icon: typeof Code }[] = [
     { id: 'editor', label: 'Editor', icon: Code },
     { id: 'analysis', label: 'Analysis', icon: Sparkles },
@@ -25,10 +24,23 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-
-      <div className="relative bg-surface border border-border rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/60"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="relative bg-surface border border-border rounded-lg shadow-xl w-full max-w-lg mx-4"
+          >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-lg font-semibold">Settings</h2>
@@ -257,23 +269,25 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-border">
-          <button
-            onClick={settings.resetToDefaults}
-            className="flex items-center gap-2 text-sm text-text-secondary hover:text-text transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Reset to defaults
-          </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-md text-sm font-medium transition-colors"
-          >
-            Done
-          </button>
+          {/* Footer */}
+          <div className="flex items-center justify-between p-4 border-t border-border">
+            <button
+              onClick={settings.resetToDefaults}
+              className="flex items-center gap-2 text-sm text-text-secondary hover:text-text transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset to defaults
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-md text-sm font-medium transition-colors"
+            >
+              Done
+            </button>
+          </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   )
 }
