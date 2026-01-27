@@ -7,7 +7,7 @@ import App from './App'
 import './index.css'
 import { useSettingsStore } from '@/stores/settingsStore'
 
-export function ThemedToaster() {
+function ThemedToaster() {
   const theme = useSettingsStore((s) => s.theme)
   return <Toaster theme={theme} position="bottom-right" />
 }
@@ -26,7 +26,7 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />
-        <Toaster theme="dark" position="bottom-right" />
+        <ThemedToaster />
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>

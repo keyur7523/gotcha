@@ -1,6 +1,7 @@
 import re
+from typing import Optional
 
-from services.gemini import gemini_client
+from services.gemini import GeminiClient
 
 TEST_GEN_PROMPT = """Generate a minimal test case to verify this potential bug in {language}:
 
@@ -27,6 +28,9 @@ Output ONLY the complete runnable code, no markdown, no explanation."""
 
 
 class TestGenerator:
+    def __init__(self, custom_api_key: Optional[str] = None):
+        self._client = GeminiClient(api_key=custom_api_key)
+
     async def generate(
         self,
         code: str,
@@ -43,7 +47,7 @@ class TestGenerator:
             code=code,
         )
 
-        response = await gemini_client.generate(
+        response = await self._client.generate(
             prompt=prompt,
             use_thinking=False,
             temperature=0.2,
@@ -63,4 +67,5 @@ class TestGenerator:
         return response.strip()
 
 
+# Default generator for backward compatibility
 test_generator = TestGenerator()

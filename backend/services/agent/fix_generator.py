@@ -1,6 +1,7 @@
 import re
+from typing import Optional
 
-from services.gemini import gemini_client
+from services.gemini import GeminiClient
 
 FIX_PROMPT = """Given this verified bug in {language} code:
 
@@ -30,6 +31,9 @@ Output ONLY the corrected code snippet for the affected lines, no explanation.""
 
 
 class FixGenerator:
+    def __init__(self, custom_api_key: Optional[str] = None):
+        self._client = GeminiClient(api_key=custom_api_key)
+
     async def generate_fix(
         self,
         code: str,
@@ -52,7 +56,7 @@ class FixGenerator:
             test_output=test_output,
         )
 
-        response = await gemini_client.generate(
+        response = await self._client.generate(
             prompt=prompt,
             use_thinking=False,
             temperature=0.2,
@@ -70,4 +74,5 @@ class FixGenerator:
         return response.strip()
 
 
+# Default generator for backward compatibility
 fix_generator = FixGenerator()

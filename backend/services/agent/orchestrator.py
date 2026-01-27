@@ -13,8 +13,8 @@ from models.analysis import (
 )
 from services.session_store import session_store
 from .analyzer import CodeAnalyzer
-from .test_generator import test_generator
-from .fix_generator import fix_generator
+from .test_generator import TestGenerator
+from .fix_generator import FixGenerator
 
 
 class AgentOrchestrator:
@@ -29,7 +29,10 @@ class AgentOrchestrator:
         self._strictness = strictness or Strictness.NORMAL
         self._max_issues = max_issues
         self._custom_api_key = custom_api_key
+        # Pass custom API key to all AI-powered components
         self._analyzer = CodeAnalyzer(custom_api_key=custom_api_key)
+        self._test_generator = TestGenerator(custom_api_key=custom_api_key)
+        self._fix_generator = FixGenerator(custom_api_key=custom_api_key)
 
     async def run_analysis(
         self,
@@ -78,7 +81,7 @@ class AgentOrchestrator:
             steps.append(step)
             yield step
 
-            test_code = await test_generator.generate(
+            test_code = await self._test_generator.generate(
                 code=session.code,
                 language=session.language.value,
                 issue_title=potential.get("title", ""),
@@ -144,7 +147,7 @@ class AgentOrchestrator:
                 steps.append(step)
                 yield step
 
-                suggested_fix = await fix_generator.generate_fix(
+                suggested_fix = await self._fix_generator.generate_fix(
                     code=session.code,
                     language=session.language.value,
                     issue_title=potential.get("title", ""),

@@ -11,7 +11,7 @@ class GeminiClient:
         # Use custom API key if provided, otherwise fall back to settings
         key = api_key or settings.gemini_api_key
         self._client = genai.Client(api_key=key)
-        self._model = "gemini-2.0-flash"
+        self._model = "gemini-3-flash-preview"  # Updated for Gemini 3 hackathon
 
     async def generate(
         self,
