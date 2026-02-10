@@ -1,6 +1,6 @@
 import { useSettingsStore } from '@/stores/settingsStore'
 
-const API_BASE = '/api/v1'
+const API_BASE = import.meta.env.VITE_API_URL || '/api/v1'
 
 function getHeaders(): Record<string, string> {
   const headers: Record<string, string> = {

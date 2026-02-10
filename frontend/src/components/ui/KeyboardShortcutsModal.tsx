@@ -1,5 +1,5 @@
 // frontend/src/components/ui/KeyboardShortcutsModal.tsx
-import { X, Command } from 'lucide-react'
+import { X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 interface KeyboardShortcutsModalProps {

@@ -21,8 +21,17 @@ export function useAnalysisWebSocket(sessionId: string | null) {
       wsRef.current.close()
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `${protocol}//${window.location.host}/api/v1/ws/${sessionId}`
+    const apiUrl = import.meta.env.VITE_API_URL || ''
+    let wsUrl: string
+    if (apiUrl) {
+      // Production: use the backend URL directly
+      const wsBase = apiUrl.replace(/^http/, 'ws')
+      wsUrl = `${wsBase}/ws/${sessionId}`
+    } else {
+      // Dev: use Vite proxy
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      wsUrl = `${protocol}//${window.location.host}/api/v1/ws/${sessionId}`
+    }
 
     console.log('Connecting to WebSocket:', wsUrl)
     const ws = new WebSocket(wsUrl)
